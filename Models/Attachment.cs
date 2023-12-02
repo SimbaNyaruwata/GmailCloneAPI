@@ -17,5 +17,5 @@ public partial class Attachment
 
     public int? Status { get; set; }
 
-    //public virtual Email Email { get; set; } = null!;
+    public virtual Email Email { get; set; } = null!;
 }

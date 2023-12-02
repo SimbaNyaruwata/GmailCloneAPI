@@ -60,24 +60,15 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Users/Create")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromBody] User user)
+        public async Task<IActionResult> Create([Bind("UserId,UserName,Email,SenderId,RecipientId,PasswordHash")] User user)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     user.Status = 1;
-
-                    //Set the hashed password
-                    user.SetPassword(user.PasswordHash);
-
                     _context.Add(user);
-
-                    //Save changes to the database
                     await _context.SaveChangesAsync();
-
-                    // Clear the password hash from the response for security reasons
-                    user.PasswordHash = null;
                     return Ok(user);
                     //return directToAction(nameof(Index));
                 }
@@ -113,53 +104,35 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Users/Update")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromBody] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("UserId,UserName,Email,SenderId,RecipientId,PasswordHash")] User user)
         {
-
-            try
+            if (id != user.UserId)
             {
-                if (_context.Users.Where(x => x.UserId == user.UserId).Count() < 1)
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
                 {
-                    return NotFound();
+                    _context.Update(user);
+                    await _context.SaveChangesAsync();
                 }
-
-                if (ModelState.IsValid)
+                catch (DbUpdateConcurrencyException)
                 {
-                    // Retrieve the existing user from the database
-                    var existingUser = await _context.Users.FindAsync(user.UserId);
-
-                    if (existingUser == null)
+                    if (!UserExists(user.UserId))
                     {
                         return NotFound();
                     }
-
-                    // Update properties that can be modified without hashing
-                    existingUser.UserName = user.UserName;
-                    existingUser.Email = user.Email;
-                    existingUser.SenderId = user.SenderId;
-                    existingUser.RecipientId = user.RecipientId;
-                    existingUser.Status = user.Status;
-
-                    // Check if the password is being updated
-                    if (!string.IsNullOrEmpty(user.PasswordHash))
+                    else
                     {
-                        // Set the new hashed password
-                        existingUser.SetPassword(user.PasswordHash);
+                        throw;
                     }
-
-                    // Save changes to the database
-                    await _context.SaveChangesAsync();
-
-                    return Ok(existingUser);
                 }
-
-                return BadRequest("Invalid model state.");
+                return Ok(user);
+                // return RedirectToAction(nameof(Index));
             }
-            catch (Exception e)
-            {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "Internal Server Error");
-            }
+            return Ok(user);
         }
 
         // GET: Users/Delete/5

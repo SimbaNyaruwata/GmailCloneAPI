@@ -38,10 +38,10 @@ public partial class GmailCloneDbContext : DbContext
             entity.Property(e => e.ContentType).HasMaxLength(50);
             entity.Property(e => e.FileName).HasMaxLength(255);
 
-           /* entity.HasOne(d => d.Email).WithMany(p => p.Attachments)
+            entity.HasOne(d => d.Email).WithMany(p => p.Attachments)
                 .HasForeignKey(d => d.EmailId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Attachments_Emails1");*/
+                .HasConstraintName("FK_Attachments_Emails1");
         });
 
         modelBuilder.Entity<Contact>(entity =>
@@ -50,10 +50,10 @@ public partial class GmailCloneDbContext : DbContext
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
 
-            /*entity.HasOne(d => d.User).WithMany(p => p.Contacts)
+            entity.HasOne(d => d.User).WithMany(p => p.Contacts)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Contacts_Users1");*/
+                .HasConstraintName("FK_Contacts_Users1");
         });
 
         modelBuilder.Entity<Email>(entity =>
@@ -63,10 +63,10 @@ public partial class GmailCloneDbContext : DbContext
             entity.Property(e => e.SentDate).HasColumnType("datetime");
             entity.Property(e => e.Subject).HasMaxLength(255);
 
-           /* entity.HasOne(d => d.Recipient).WithMany(p => p.Emails)
+            entity.HasOne(d => d.Recipient).WithMany(p => p.Emails)
                 .HasForeignKey(d => d.RecipientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Emails_Users1");*/
+                .HasConstraintName("FK_Emails_Users1");
         });
 
         modelBuilder.Entity<User>(entity =>

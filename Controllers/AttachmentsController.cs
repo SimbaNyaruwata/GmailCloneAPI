@@ -23,7 +23,7 @@ namespace GmailClone.Controllers
         // GET: Attachments
         public async Task<IActionResult> Index()
         {
-            var gmailCloneDbContext = _context.Attachments;
+            var gmailCloneDbContext = _context.Attachments.Include(a => a.Email);
             return View(await gmailCloneDbContext.ToListAsync());
         }
 
@@ -38,7 +38,7 @@ namespace GmailClone.Controllers
             }
 
             var attachment = await _context.Attachments
-                //.Include(a => a.Email)
+                .Include(a => a.Email)
                 .FirstOrDefaultAsync(m => m.AttachmentId == id);
             if (attachment == null)
             {
@@ -62,7 +62,7 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Attachments/Create")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromBody] Attachment attachment)
+        public async Task<IActionResult> Create([Bind("AttachmentId,EmailId,FileName,ContentType,Data")] Attachment attachment)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace GmailClone.Controllers
                     return Ok(attachment);
                     //return RedirectToAction(nameof(Index));
                 }
-               // ViewData["EmailId"] = new SelectList(_context.Emails, "EmailId", "EmailId", attachment.EmailId);
+                ViewData["EmailId"] = new SelectList(_context.Emails, "EmailId", "EmailId", attachment.EmailId);
                 return Ok(attachment);
             }
             catch(Exception e)
@@ -108,9 +108,9 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Attachments/Update")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromBody] Attachment attachment)
+        public async Task<IActionResult> Edit(int id, [Bind("AttachmentId,EmailId,FileName,ContentType,Data")] Attachment attachment)
         {
-            if (_context.Attachments.Where(x => x.AttachmentId == attachment.AttachmentId).Count() < 1)
+            if (id != attachment.AttachmentId)
             {
                 return NotFound();
             }
@@ -150,7 +150,7 @@ namespace GmailClone.Controllers
             }
 
             var attachment = await _context.Attachments
-                //.Include(a => a.Email)
+                .Include(a => a.Email)
                 .FirstOrDefaultAsync(m => m.AttachmentId == id);
             if (attachment == null)
             {
