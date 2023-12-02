@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GmailClone.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("Login")]
     [ApiController]
     public class LoginController : ControllerBase
     {
@@ -35,7 +35,7 @@ namespace GmailClone.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Post([Bind("Email,PasswordHash")]LoginRequest loginRequest)
+        public async Task<IActionResult> Post([FromBody]LoginRequest loginRequest)
         {
             //your logic for login process
             //If login usrename and password are correct then proceed to generate token
@@ -43,10 +43,12 @@ namespace GmailClone.Controllers
             try
             {
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(m => m.Email == loginRequest.email && m.PasswordHash == loginRequest.password);
-                if (user == null)
+                    .FirstOrDefaultAsync(m => m.Email == loginRequest.email);
+
+                if (user == null || !user.VerifyPassword(loginRequest.password))
                 {
-                    return NotFound();
+                    // Invalid credentials
+                    return Unauthorized("Invalid email or password");
                 }
                 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
