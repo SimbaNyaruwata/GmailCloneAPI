@@ -17,5 +17,5 @@ public partial class Contact
 
     public int? Status { get; set; }
 
-    public virtual User User { get; set; } = null!;
+   // public virtual User User { get; set; } = null!;
 }

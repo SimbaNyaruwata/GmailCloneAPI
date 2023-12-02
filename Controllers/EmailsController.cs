@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GmailClone.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class EmailsController : Controller
     {
         private readonly GmailCloneDbContext _context;
@@ -23,7 +23,7 @@ namespace GmailClone.Controllers
         // GET: Emails
         public async Task<IActionResult> Index()
         {
-            var gmailCloneDbContext = _context.Emails.Include(e => e.Recipient);
+            var gmailCloneDbContext = _context.Emails;
             return View(await gmailCloneDbContext.ToListAsync());
         }
 
@@ -38,7 +38,7 @@ namespace GmailClone.Controllers
             }
 
             var email = await _context.Emails
-                .Include(e => e.Recipient)
+                //.Include(e => e.Recipient)
                 .FirstOrDefaultAsync(m => m.EmailId == id);
             if (email == null)
             {
@@ -61,19 +61,19 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Emails/Create")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EmailId,SenderId,RecipientId,Subject,Body,SentDate,IsRead")] Email email)
+        public async Task<IActionResult> Create( [FromBody]Email email)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     email.Status = 1;
-                    _context.Add(email);
+                    _context.Emails.Add(email);
                     await _context.SaveChangesAsync();
                     return Ok(email);
                     //return RedirectToAction(nameof(Index));
                 }
-                ViewData["RecipientId"] = new SelectList(_context.Users, "UserId", "UserId", email.RecipientId);
+               // ViewData["RecipientId"] = new SelectList(_context.Users, "UserId", "UserId", email.RecipientId);
                 return Ok(email);
             }
             catch(Exception e)
@@ -149,7 +149,7 @@ namespace GmailClone.Controllers
             }
 
             var email = await _context.Emails
-                .Include(e => e.Recipient)
+               // .Include(e => e.Recipient)
                 .FirstOrDefaultAsync(m => m.EmailId == id);
             if (email == null)
             {

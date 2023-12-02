@@ -24,7 +24,7 @@ namespace GmailClone.Controllers
         // GET: Contacts
         public async Task<IActionResult> Index()
         {
-            var gmailCloneDbContext = _context.Contacts.Include(c => c.User);
+            var gmailCloneDbContext = _context.Contacts;
             return View(await gmailCloneDbContext.ToListAsync());
         }
 
@@ -39,7 +39,7 @@ namespace GmailClone.Controllers
             }
 
             var contact = await _context.Contacts
-                .Include(c => c.User)
+                //.Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.ContactId == id);
             if (contact == null)
             {
@@ -62,18 +62,26 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Contacts/Create")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ContactId,UserId,FirstName,LastName,Email")] Contact contact)
+        public async Task<IActionResult> Create([FromBody] Contact contact)
         {
-            if (ModelState.IsValid)
+            try
             {
-                contact.Status = 1;
-                _context.Add(contact);
-                await _context.SaveChangesAsync();
+                if (ModelState.IsValid)
+                {
+                    contact.Status = 1;
+                    _context.Add(contact);
+                    await _context.SaveChangesAsync();
+                    return Ok(contact);
+                    //return RedirectToAction(nameof(Index));
+                }
+               // ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", contact.UserId);
                 return Ok(contact);
-                //return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", contact.UserId);
-            return Ok(contact);
+            catch(Exception e)
+            {
+                throw;
+            }
+            
         }
 
         // GET: Contacts/Edit/5
@@ -99,9 +107,9 @@ namespace GmailClone.Controllers
         [HttpPost]
         [Route("Contacts/Update")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ContactId,UserId,FirstName,LastName,Email")] Contact contact)
+        public async Task<IActionResult> Edit([FromBody] Contact contact)
         {
-            if (id != contact.ContactId)
+            if (_context.Contacts.Where(x => x.ContactId == contact.ContactId).Count()<1)
             {
                 return NotFound();
             }
@@ -127,7 +135,7 @@ namespace GmailClone.Controllers
                 return Ok(contact);
                 //return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", contact.UserId);
+           // ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", contact.UserId);
             return Ok(contact);
         }
 
@@ -142,7 +150,7 @@ namespace GmailClone.Controllers
             }
 
             var contact = await _context.Contacts
-                .Include(c => c.User)
+                //.Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.ContactId == id);
             if (contact == null)
             {
